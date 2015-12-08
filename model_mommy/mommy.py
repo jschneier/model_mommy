@@ -21,7 +21,12 @@ from django.db.models import (
     BooleanField, DecimalField, FloatField,
     FileField, ImageField, Field, IPAddressField,
     ForeignKey, ManyToManyField, OneToOneField)
-from django.db.models.fields.related import ForeignRelatedObjectsDescriptor
+
+if django.VERSION >= (1, 9):
+    from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
+else:
+    from django.db.models.fields.related import ForeignRelatedObjectsDescriptor as ReverseManyToOneDescriptor
+
 from django.db.models.fields.proxy import OrderWrt
 try:
     from django.db.models import BigIntegerField
@@ -353,7 +358,7 @@ class Mommy(object):
         one_to_many_keys = {}
         for k in tuple(attrs.keys()):
             field = getattr(self.model, k, None)
-            if isinstance(field, ForeignRelatedObjectsDescriptor):
+            if isinstance(field, ReverseManyToOneDescriptor):
                 one_to_many_keys[k] = attrs.pop(k)
 
         instance = self.model(**attrs)
